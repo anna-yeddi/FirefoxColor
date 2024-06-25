@@ -2,6 +2,9 @@ on:
   push:
     branches:
       - gcp-deploy
+env:
+  SITE_URL: https://color.stage.mozaws.net/
+  ADDON_URL: testing.html
 jobs:
   build_test:
     runs-on: ubuntu-latest
@@ -9,26 +12,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 14
-
-      - name: Genreate env variables
-        id : env
-        run: |
-          if {github.ref == 'refs/heads/master'}; then
-            SITE_URL="https://color.firefox.com/"
-            ADDON_URL="https://addons.mozilla.org/firefox/addon/firefox-color/"
-            echo "prod" >> $GITHUB_OUPUT
-          else
-            SITE_URL="https://color.stage.mozaws.net/"
-            ADDON_URL="testing.html"
-            echo "stage" >> $GITHUB_OUPUT
-          fi
-          echo "SITE_URL=$SITE_URL" >> $GITHUB_ENV
-          echo "ADDON_URL=$ADDON_URL" >> $GITHUB_ENV
 
       - name: Install dependencies
         run: npm ci
@@ -47,12 +37,9 @@ jobs:
 
       - name: npm run test
         run: npm run test
-    outputs:
-      env: ${{ steps.env.outputs.GITHUB_OUPUT }}
-
+  
   deploy_gcp:
-    if: ${{ needs.build_test.outputs.env == 'stage' }}
-    environment: production
+    environment: stage
     needs: build_test
     runs-on: ubuntu-latest
 
