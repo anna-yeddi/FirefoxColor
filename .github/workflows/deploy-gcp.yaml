@@ -51,7 +51,7 @@ jobs:
       env: ${{ steps.env.outputs.GITHUB_OUPUT }}
 
   deploy_gcp:
-    if: ${{ needs.build_test.outputs.env == 'prod' }}
+    if: ${{ needs.build_test.outputs.env == 'stage' }}
     environment: production
     needs: build_test
     runs-on: ubuntu-latest
